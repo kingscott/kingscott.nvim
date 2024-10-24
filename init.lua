@@ -197,6 +197,9 @@ vim.cmd [[
   autocmd FileType embedded_template setlocalexpandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2 softtabstop=2
 ]]
 
+-- Git stuff
+vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Open [G]it status' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -260,6 +263,73 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+
+  { -- Quick file switcher
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    opts = {
+      menu = {
+        width = vim.api.nvim_win_get_width(0) - 25,
+      },
+      settings = {
+        save_on_toggle = true,
+      },
+    },
+    keys = function()
+      local keys = {
+        {
+          '<leader>a',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():add()
+          end,
+          desc = 'H[a]rpoon file',
+        },
+        {
+          '<C-e>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon.ui:toggle_quick_menu(harpoon:list())
+          end,
+          desc = 'Toggle harpoon menu',
+        },
+        {
+          '<C-h>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(1)
+          end,
+          desc = 'Navigate to harpoon file [1]',
+        },
+        {
+          '<C-t>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(2)
+          end,
+          desc = 'Navigate to harpoon file [2]',
+        },
+        {
+          '<C-n>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(3)
+          end,
+          desc = 'Navigate to harpoon file [3]',
+        },
+        {
+          '<C-m>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(3)
+          end,
+          desc = 'Navigate to harpoon file [4]',
+        },
+      }
+
+      return keys
+    end,
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -435,6 +505,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>st', builtin.git_files, { desc = '[S]earch [T]racked files' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
