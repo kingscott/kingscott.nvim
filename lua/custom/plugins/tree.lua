@@ -10,7 +10,7 @@ return {
     require('nvim-tree').setup {}
 
     -- TODO these keymaps don't really make sense
-    vim.keymap.set('n', '<leader>f', ':NvimTreeFindFileToggle<CR>', { desc = 'Toggle [F]ile tree' })
-    vim.keymap.set('n', '<leader>ff', ':NvimTreeFindFile<CR>', { desc = '[F]ind [F]file in tree' })
+    vim.keymap.set('n', '<leader>n', ':NvimTreeFindFileToggle<CR>', { desc = '[N]vim-tree toggle' })
+    vim.keymap.set('n', '<leader>nf', ':NvimTreeFindFile<CR>', { desc = '[N]vim-tree [F]ind File' })
   end,
 }
