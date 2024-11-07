@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -160,12 +160,45 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Set ; to : for easier nav and less button keys
+vim.keymap.set('n', ';', ':')
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- kingscott.nvim vim sets
+vim.opt.guicursor = ''
+vim.opt.nu = true
+--vim.opt.tabstop = 4
+--vim.opt.softtabstop = 4
+--vim.opt.shiftwidth = 4
+vim.opt.wrap = false
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.writebackup = false
+
+vim.cmd [[
+  autocmd FileType html setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType css setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType javascript setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType typescript setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType typescriptreact setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType go setlocal expandtab smartindent tabstop=4 shiftwidth=4 softtabstop=4
+  autocmd FileType rust setlocal expandtab smartindent tabstop=4 shiftwidth=4 softtabstop=4
+  autocmd FileType lua setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType nix setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType json setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
+  autocmd FileType ruby setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2 softtabstop=2
+  autocmd FileType eruby setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2 softtabstop=2
+  autocmd FileType embedded_template setlocalexpandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2 softtabstop=2
+]]
+
+-- Git stuff
+vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Open [G]it status' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -231,6 +264,73 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
+  { -- Quick file switcher
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    opts = {
+      menu = {
+        width = vim.api.nvim_win_get_width(0) - 25,
+      },
+      settings = {
+        save_on_toggle = true,
+      },
+    },
+    keys = function()
+      local keys = {
+        {
+          '<leader>a',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():add()
+          end,
+          desc = 'H[a]rpoon file',
+        },
+        {
+          '<C-e>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon.ui:toggle_quick_menu(harpoon:list())
+          end,
+          desc = 'Toggle harpoon menu',
+        },
+        {
+          '<C-h>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(1)
+          end,
+          desc = 'Navigate to harpoon file [1]',
+        },
+        {
+          '<C-t>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(2)
+          end,
+          desc = 'Navigate to harpoon file [2]',
+        },
+        {
+          '<C-n>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(3)
+          end,
+          desc = 'Navigate to harpoon file [3]',
+        },
+        {
+          '<C-m>',
+          function()
+            local harpoon = require 'harpoon'
+            harpoon:list():select(3)
+          end,
+          desc = 'Navigate to harpoon file [4]',
+        },
+      }
+
+      return keys
+    end,
+  },
+
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -246,6 +346,7 @@ require('lazy').setup({
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
+      current_line_blame = true,
       signs = {
         add = { text = '+' },
         change = { text = '~' },
@@ -404,6 +505,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>st', builtin.git_files, { desc = '[S]earch [T]racked files' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -547,6 +649,18 @@ require('lazy').setup({
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+          -- kingscott.nvim
+          -------------------
+
+          -- Get help with the signature of a method
+          map('<C-h>', function()
+            vim.lsp.buf.signature_help()
+          end, 'Signature [H]elp', 'i')
+
+          map('K', function()
+            vim.lsp.buf.hover()
+          end, 'Hover')
+
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
@@ -646,6 +760,9 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'eslint', -- Used for linting JavaScript code
+        'rubocop', -- Used for linting Ruby code
+        'ruby_lsp', -- Used for format Ruby + Rails code
         'stylua', -- Used to format Lua code
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -681,7 +798,7 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
+      format_after_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
@@ -698,7 +815,16 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
+        css = { 'prettierd' },
+        erb = { 'erb_format' },
+        html = { 'prettierd' },
+        graphql = { 'prettierd' },
+        json = { 'prettierd' },
+        javascript = { 'prettierd' },
+        javascriptreact = { 'prettierd' },
         lua = { 'stylua' },
+        typescriptreact = { 'prettierd' },
+        ruby = { 'rubocop' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -728,12 +854,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -824,21 +950,29 @@ require('lazy').setup({
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+  -- TODO: REMOVE
+  --{ -- You can easily change to a different colorscheme.
+  --  -- Change the name of the colorscheme plugin below, and then
+  --  -- change the command in the config to whatever the name of that colorscheme is.
+  --  --
+  --  -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  --  'folke/tokyonight.nvim',
+  --  priority = 1000, -- Make sure to load this before all the other start plugins.
+  --  init = function()
+  --    -- Load the colorscheme here.
+  --    -- Like many other themes, this one has different styles, and you could load
+  --    -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+  --    vim.cmd.colorscheme 'tokyonight-night'
+  --    -- You can configure highlights by doing something like:
+  --    vim.cmd.hi 'Comment gui=none'
+  --  end,
+  --},
 
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+  { -- kingscott.nvim theme: Rose Pine
+    'rose-pine/neovim',
+    priority = 1000,
+    init = function()
+      vim.cmd.colorscheme 'rose-pine'
     end,
   },
 
@@ -888,7 +1022,23 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'embedded_template',
+        'html',
+        'javascript',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'ruby',
+        'tsx',
+        'vim',
+        'vimdoc',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -921,15 +1071,14 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
