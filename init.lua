@@ -321,7 +321,7 @@ require('lazy').setup({
           '<C-m>',
           function()
             local harpoon = require 'harpoon'
-            harpoon:list():select(3)
+            harpoon:list():select(4)
           end,
           desc = 'Navigate to harpoon file [4]',
         },
