@@ -483,12 +483,29 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          -- Show hidden files and don't respect .gitignore
+          vimgrep_arguments = {
+            'rg',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden', -- Show hidden files
+            '--no-ignore', -- Don't respect .gitignore
+          },
+          file_ignore_patterns = { '^.git/', '^.github/', '^target/', '.DS_Store', '^vendor/', '^node_modules/' }, -- Ignore .git directory but show everything else
+          -- mappings = {
+          --   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          -- },
+        },
+        pickers = {
+          find_files = {
+            hidden = true, -- Show hidden files
+            no_ignore = true, -- Show gitignored files
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
