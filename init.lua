@@ -102,7 +102,7 @@ vim.g.have_nerd_font = true
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -495,7 +495,7 @@ require('lazy').setup({
             '--hidden', -- Show hidden files
             '--no-ignore', -- Don't respect .gitignore
           },
-          file_ignore_patterns = { '^.git/', '^.github/', '^target/', '.DS_Store', '^vendor/', '^node_modules/' }, -- Ignore .git directory but show everything else
+          file_ignore_patterns = { '^.git/', '^.github/', '^target/', '.DS_Store', '^vendor/', '^node_modules/', '^log/', '^.dev/', '^coverage/' }, -- Ignore .git directory but show everything else
           -- mappings = {
           --   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
           -- },
@@ -581,7 +581,7 @@ require('lazy').setup({
         'WhoIsSethDaniel/mason-tool-installer.nvim',
         dependencies = { 'williamboman/mason.nvim' },
         opts = {
-          ensure_installed = { 'lua_ls', 'bashls', 'rubocop', 'ruby_lsp' },
+          ensure_installed = { 'lua_ls', 'bashls', 'rubocop', 'ruby_lsp', 'tailwindcss-language-server' },
           auto_update = true,
           run_on_start = true,
         },
