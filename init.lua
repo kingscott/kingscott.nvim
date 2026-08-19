@@ -577,14 +577,11 @@ require('lazy').setup({
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'mason-org/mason.nvim', build = ':MasonUpdate', opts = {} }, -- NOTE: Must be loaded before dependants
       { 'mason-org/mason-lspconfig.nvim', dependencies = { 'williamboman/mason.nvim', 'neovim/nvim-lspconfig' } },
+      -- NOTE: setup for this is called below, alongside the `servers` table, so that
+      -- there is a single source of truth for what gets installed.
       {
         'WhoIsSethDaniel/mason-tool-installer.nvim',
         dependencies = { 'williamboman/mason.nvim' },
-        opts = {
-          ensure_installed = { 'lua_ls', 'bashls', 'rubocop', 'ruby_lsp', 'tailwindcss-language-server' },
-          auto_update = true,
-          run_on_start = true,
-        },
       },
 
       -- Useful status updates for LSP.
@@ -771,6 +768,48 @@ require('lazy').setup({
             },
           },
         },
+
+        -- TypeScript. `vtsls` bundles its own tsserver, so it works against repos
+        -- pinned to TypeScript 7 (whose `tsc` binary ships no language server).
+        vtsls = {
+          -- Wires in Glint's tsserver plugin so .gts/.gjs `<template>` tags get
+          -- type-checked, but only for workspaces that actually have it installed
+          -- (e.g. the `ui` repo), so other projects using vtsls are unaffected.
+          on_new_config = function(new_config, root_dir)
+            local glint_plugin_dir = root_dir .. '/node_modules/@glint/tsserver-plugin'
+            if vim.fn.isdirectory(glint_plugin_dir) == 1 then
+              new_config.settings = vim.tbl_deep_extend('force', new_config.settings or {}, {
+                vtsls = {
+                  tsserver = {
+                    globalPlugins = {
+                      {
+                        name = '@glint/tsserver-plugin',
+                        location = root_dir .. '/node_modules',
+                        enableForWorkspaceTypeScriptVersions = true,
+                      },
+                    },
+                  },
+                },
+              })
+            end
+          end,
+        },
+
+        gopls = {},
+
+        -- Oxlint. The mason `oxlint` package only ships the `oxlint` CLI, not the
+        -- `oxc_language_server` binary that nvim-lspconfig defaults to, so run the
+        -- CLI in language server mode instead.
+        oxlint = {
+          cmd = { 'oxlint', '--lsp' },
+        },
+
+        -- Ember/Glimmer-specific LSP: route and component navigation, template
+        -- autocomplete. Complements vtsls, which only understands plain TS/JS.
+        ember = {},
+
+        -- CSS/SCSS hover, completion, and validation.
+        cssls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -781,24 +820,25 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'eslint', -- Used for linting JavaScript code
-        'rubocop', -- Used for linting Ruby code
-        'ruby_lsp', -- Used for format Ruby + Rails code
+        'oxfmt', -- Used to format JS/TS/JSON/Markdown in oxc-based repos
+        'prettierd', -- Used to format css/html/graphql
         'stylua', -- Used to format Lua code
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-      require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+      require('mason-tool-installer').setup {
+        ensure_installed = ensure_installed,
+        auto_update = true,
+        run_on_start = true,
       }
+
+      -- mason-lspconfig v2 dropped the `handlers` option and instead auto-enables
+      -- every installed server via `vim.lsp.enable()`. Per-server overrides now go
+      -- through `vim.lsp.config()`, which merges on top of nvim-lspconfig's defaults.
+      for server_name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(server_name, server)
+      end
+
+      require('mason-lspconfig').setup {}
     end,
   },
 
@@ -836,15 +876,20 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         css = { 'prettierd' },
+        scss = { 'prettierd' },
         erb = { 'erb_format' },
         html = { 'prettierd' },
         graphql = { 'prettierd' },
-        json = { 'prettierd' },
-        javascript = { 'prettierd' },
-        javascriptreact = { 'prettierd' },
+        go = { 'goimports' },
         lua = { 'stylua' },
-        typescriptreact = { 'prettierd' },
-        ruby = { 'rubocop' },
+        -- oxc-based repos format with oxfmt; conform resolves it from the project's
+        -- node_modules/.bin first, so the repo-pinned version wins over mason's.
+        javascript = { 'oxfmt', 'prettierd', stop_after_first = true },
+        javascriptreact = { 'oxfmt', 'prettierd', stop_after_first = true },
+        typescript = { 'oxfmt', 'prettierd', stop_after_first = true },
+        typescriptreact = { 'oxfmt', 'prettierd', stop_after_first = true },
+        json = { 'oxfmt', 'prettierd', stop_after_first = true },
+        markdown = { 'oxfmt', 'prettierd', stop_after_first = true },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1038,6 +1083,9 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    -- `main` is an incompatible rewrite; Telescope 0.1.x and the config below
+    -- use the legacy module API provided by `master`.
+    branch = 'master',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -1045,19 +1093,32 @@ require('lazy').setup({
       ensure_installed = {
         'bash',
         'c',
+        'css',
         'diff',
         'embedded_template',
+        'glimmer',
+        'go',
+        'gomod',
+        'gosum',
+        'gowork',
         'html',
         'javascript',
+        'json',
+        'jsonc',
         'lua',
         'luadoc',
         'markdown',
         'markdown_inline',
+        'proto',
         'query',
-        'ruby',
+        'scss',
+        'sql',
+        'toml',
         'tsx',
+        'typescript',
         'vim',
         'vimdoc',
+        'yaml',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
