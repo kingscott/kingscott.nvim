@@ -187,7 +187,7 @@ vim.cmd [[
   autocmd FileType javascript setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
   autocmd FileType typescript setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
   autocmd FileType typescriptreact setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
-  autocmd FileType go setlocal expandtab smartindent tabstop=4 shiftwidth=4 softtabstop=4
+  autocmd FileType go setlocal nolist expandtab smartindent tabstop=4 shiftwidth=4 softtabstop=4
   autocmd FileType rust setlocal expandtab smartindent tabstop=4 shiftwidth=4 softtabstop=4
   autocmd FileType lua setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
   autocmd FileType nix setlocal expandtab smartindent tabstop=2 shiftwidth=2 softtabstop=2
@@ -1032,11 +1032,12 @@ require('lazy').setup({
   --  end,
   --},
 
-  { -- kingscott.nvim theme: Rose Pine
-    'rose-pine/neovim',
+  { -- Theme: Kanagawa Dragon
+    'rebelot/kanagawa.nvim',
     priority = 1000,
-    init = function()
-      vim.cmd.colorscheme 'rose-pine'
+    config = function()
+      require('kanagawa').setup { theme = 'dragon', background = { dark = 'dragon', light = 'lotus' } }
+      vim.cmd.colorscheme 'kanagawa-dragon'
     end,
   },
 
