@@ -162,6 +162,27 @@ return {
     },
   },
 
+  -- Treesitter parsers not already installed by LazyVim or the language extras
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = { "embedded_template", "json5", "proto", "scss", "sql" },
+    },
+    init = function()
+      -- Parse jsonc with json5, which allows trailing commas. nvim-treesitter maps jsonc to json
+      -- when it loads, so register after that.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "LazyLoad",
+        callback = function(ev)
+          if ev.data == "nvim-treesitter" then
+            vim.treesitter.language.register("json5", "jsonc")
+            return true
+          end
+        end,
+      })
+    end,
+  },
+
   -- Git
   { "tpope/vim-fugitive", cmd = "Git" },
 
