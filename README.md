@@ -5,7 +5,7 @@ My Neovim config. It is built on [LazyVim](https://www.lazyvim.org/), starting f
 ## What this config is
 
 - **Base:** Omarchy's LazyVim config. The LazyVim extras are listed in `lazyvim.json`: neo-tree, Ember, Go, TypeScript, and TypeScript oxc.
-- **Theme:** `lua/plugins/theme.lua` is a symlink to Omarchy's current Neovim theme file, so the colorscheme follows the Omarchy theme. `lua/plugins/omarchy-theme-hotreload.lua` reloads it when the theme changes. `lua/plugins/all-themes.lua` loads the theme plugins.
+- **Theme:** `lua/plugins/theme.lua` is a symlink to Omarchy's current Neovim theme file, so the colorscheme follows the Omarchy theme. `lua/plugins/omarchy-theme-hotreload.lua` reloads it when the theme changes. `lua/plugins/all-themes.lua` loads the theme plugins. On machines where the symlink doesn't resolve (no Omarchy), `lua/plugins/theme-fallback.lua` falls back to `kanagawa-dragon`.
 - **Personal changes:**
   - `lua/config/` holds options, keymaps, autocmds, and the clipboard setup (`remote_clipboard.lua`).
   - `lua/plugins/kingscott.lua` holds the start screen, picker settings, LSP and git keymaps, extra Treesitter parsers, and Harpoon.
